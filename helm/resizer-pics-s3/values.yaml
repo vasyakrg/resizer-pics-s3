@@ -1,0 +1,130 @@
+# Default values for resizer-pics-s3
+replicaCount: 2
+
+image:
+  repository: resizer-pics-s3
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  fsGroup: 1001
+  runAsNonRoot: true
+  runAsUser: 1001
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1001
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/rate-limit: "30"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1s"
+  hosts:
+    - host: resizer.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: resizer-tls
+      hosts:
+        - resizer.example.com
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - resizer-pics-s3
+          topologyKey: kubernetes.io/hostname
+
+# Application configuration
+config:
+  nodeEnv: production
+  port: 3000
+  logLevel: info
+  maxImageWidth: 2048
+  maxImageHeight: 2048
+  imageQuality: 85
+
+# S3 configuration
+s3:
+  region: us-east-1
+  bucketName: ""
+  endpoint: ""
+  forcePathStyle: false
+
+# Secrets (will be created as Kubernetes Secret)
+secrets:
+  awsAccessKeyId: ""
+  awsSecretAccessKey: ""
+
+# Health checks
+healthCheck:
+  enabled: true
+  path: /health
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+# Monitoring
+monitoring:
+  enabled: false
+  serviceMonitor:
+    enabled: false
+    namespace: monitoring
+    interval: 30s
+    path: /metrics

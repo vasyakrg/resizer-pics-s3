@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: { { include "resizer-pics-s3.fullname" . } }
+  labels: { { - include "resizer-pics-s3.labels" . | nindent 4 } }
+spec:
+  type: { { .Values.service.type } }
+  ports:
+    - port: { { .Values.service.port } }
+      targetPort: { { .Values.service.targetPort } }
+      protocol: TCP
+      name: http
+  selector: { { - include "resizer-pics-s3.selectorLabels" . | nindent 4 } }

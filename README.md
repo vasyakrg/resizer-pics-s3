@@ -77,6 +77,10 @@ IMAGE_QUALITY=85
 docker-compose up -d
 ```
 
+### 4. Запуск в кубе
+
+[helm-чарт](./helm/README.md)
+
 ## Разработка
 
 ### Локальный запуск

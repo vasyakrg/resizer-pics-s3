@@ -1,0 +1,87 @@
+# Production values for resizer-pics-s3
+replicaCount: 3
+
+image:
+  repository: your-registry.com/resizer-pics-s3
+  pullPolicy: Always
+  tag: "v1.0.0"
+
+resources:
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+  requests:
+    cpu: 1000m
+    memory: 1Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 60
+  targetMemoryUtilizationPercentage: 70
+
+config:
+  nodeEnv: production
+  logLevel: info
+  maxImageWidth: 4096
+  maxImageHeight: 4096
+  imageQuality: 90
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1s"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: images.yourdomain.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: resizer-tls-prod
+      hosts:
+        - images.yourdomain.com
+
+# Production S3 configuration
+s3:
+  region: us-east-1
+  bucketName: "your-production-bucket"
+  # endpoint: "https://s3.amazonaws.com"  # For AWS S3
+  # forcePathStyle: false
+
+# Monitoring
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    namespace: monitoring
+    interval: 30s
+    path: /metrics
+
+# Node affinity for production workloads
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: node-type
+              operator: In
+              values:
+                - worker
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+                - resizer-pics-s3
+        topologyKey: kubernetes.io/hostname
