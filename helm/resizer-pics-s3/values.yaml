@@ -4,7 +4,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/vasyakrg/resizer-pics-s3
   pullPolicy: IfNotPresent
-  tag: "v1.0.1"
+  tag: "v1.0.2"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -97,6 +97,7 @@ config:
   maxImageWidth: 2048
   maxImageHeight: 2048
   imageQuality: 85
+  enableFileLogging: false
 
 # S3 configuration
 s3:

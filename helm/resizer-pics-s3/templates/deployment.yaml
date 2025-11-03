@@ -50,6 +50,10 @@ spec:
               value: {{ .Values.config.maxImageHeight | quote }}
             - name: IMAGE_QUALITY
               value: {{ .Values.config.imageQuality | quote }}
+            {{- if .Values.config.enableFileLogging }}
+            - name: ENABLE_FILE_LOGGING
+              value: "true"
+            {{- end }}
             - name: AWS_REGION
               value: {{ .Values.s3.region | quote }}
             - name: S3_BUCKET_NAME
@@ -93,12 +97,16 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- if or (ne .Values.config.nodeEnv "production") .Values.config.enableFileLogging }}
           volumeMounts:
             - name: logs
               mountPath: /usr/src/app/logs
+          {{- end }}
+      {{- if or (ne .Values.config.nodeEnv "production") .Values.config.enableFileLogging }}
       volumes:
         - name: logs
           emptyDir: {}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
