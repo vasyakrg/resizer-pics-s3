@@ -93,7 +93,7 @@ affinity:
 config:
   nodeEnv: production
   port: 3000
-  logLevel: info
+  logLevel: debug
   maxImageWidth: 2048
   maxImageHeight: 2048
   imageQuality: 85
