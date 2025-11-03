@@ -1,10 +1,10 @@
 # Default values for resizer-pics-s3
-replicaCount: 2
+replicaCount: 1
 
 image:
-  repository: resizer-pics-s3
+  repository: ghcr.io/vasyakrg/resizer-pics-s3
   pullPolicy: IfNotPresent
-  tag: "latest"
+  tag: "v1.0.1"
 
 imagePullSecrets: []
 nameOverride: ""
