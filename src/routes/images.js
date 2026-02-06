@@ -6,7 +6,7 @@ const logger = require("../utils/logger");
 
 const s3Service = new S3Service();
 const imageService = new ImageService();
-const S3_BASE_PATH = process.env.S3_BASE_PATH || "images";
+const S3_BASE_PATH = process.env.S3_BASE_PATH ?? "images";
 
 // Route for images with optional resizing
 // Supports both:
@@ -35,10 +35,10 @@ router.get("/*", async (req, res, next) => {
         height: parseInt(match[2]),
       };
       // Keep the full path after dimensions and add base path prefix
-      imagePath = `${S3_BASE_PATH}/${pathParts.slice(1).join("/")}`;
+      imagePath = S3_BASE_PATH ? `${S3_BASE_PATH}/${pathParts.slice(1).join("/")}` : pathParts.slice(1).join("/");
     } else {
       // Original image path: add base path prefix since Express strips it
-      imagePath = `${S3_BASE_PATH}/${fullPath}`;
+      imagePath = S3_BASE_PATH ? `${S3_BASE_PATH}/${fullPath}` : fullPath;
       dimensions = null;
     }
 
