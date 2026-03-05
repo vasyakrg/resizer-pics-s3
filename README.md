@@ -62,6 +62,9 @@ S3_BUCKET_NAME=your_bucket_name_here
 MAX_IMAGE_WIDTH=2048
 MAX_IMAGE_HEIGHT=2048
 IMAGE_QUALITY=85
+
+# Base path
+S3_BASE_PATH="images"
 ```
 
 ### 3. Размещение TLS сертификатов
